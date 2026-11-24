@@ -1,0 +1,61 @@
+{% extends 'Ecommerce_app/base.html' %}
+{% block content %}
+
+<div class="product-detail">
+
+    <div class="product-image">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" width="350">
+        {% endif %}
+    </div>
+
+    <div class="product-information">
+
+        <h1>{{ product.name }}</h1>
+
+        <p>{{ product.description }}</p>
+
+        <h3>Price: Rs. {{ product.price }}</h3>
+
+        {% if product.discount > 0 %}
+    <span class="discount-price">
+        Rs. {{ product.price|floatformat:2 }}
+    </span>
+
+    <span class="discount">
+        {{ product.discount }}% OFF
+    </span>
+
+    <p class="final-price">
+        Rs. {{ product.discounted_price|floatformat:2 }}
+    </p>
+    {% else %}
+    <p class="final-price">
+        Rs. {{ product.price|floatformat:2 }}
+    </p>
+    {% endif %}
+
+        <p>Available Stock: {{ product.stock }}</p>
+
+        {% if product.is_trending %}
+            <span>Trending Product</span>
+        {% endif %}
+
+        {% if product.is_new %}
+            <span>New Arrival</span>
+        {% endif %}
+
+        {% if product.stock > 0 %}
+            <div class="product-actions">
+                <button type="button">Add to Cart</button>
+                <button type="button">Buy Now</button>
+            </div>
+        {% else %}
+            <p>Out of Stock</p>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

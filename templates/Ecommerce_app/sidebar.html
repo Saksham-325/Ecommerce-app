@@ -1,0 +1,19 @@
+<aside class="sidebar">
+  <nav>
+    <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+    <a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+    <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'categories' %}active{% endif %}">Categories</a>
+    <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'products' %}active{% endif %}">Products</a>
+    <a href="{% url 'cart' %}" class="{% if request.resolver_match.url_name == 'cart' %}active{% endif %}">Cart</a>
+    <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'orders' %}active{% endif %}">Orders</a>
+    <a href="{% url 'wishlist' %}" class="{% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}">Wishlist</a>
+    <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">Profile</a>
+    <a href="{% url 'contacts' %}" class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Contact</a>
+  </nav>
+
+  <div class="special-offer">
+    <h4>Special Offer!</h4>
+    <p>Get 20% OFF on your first order</p>
+    <a href="{% url 'home' %}">Shop Now</a>
+  </div>
+</aside>

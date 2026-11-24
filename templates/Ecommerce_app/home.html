@@ -1,0 +1,101 @@
+
+{% extends 'Ecommerce_app/base.html' %}
+{% load static %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block content %}
+
+<section class="products-section">
+
+    <div class="section-heading">
+        <h1>Our Latest Products</h1>
+        <p>Discover our latest collection</p>
+    </div>
+
+    <div class="product-container">
+
+        {% for product in products %}
+
+        <div class="product-card">
+
+            <div class="product-image">
+
+                {% if product.image %}
+                   <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'images/no-image.png' %}"
+                         alt="No image available">
+                {% endif %}
+
+                {% if product.is_new %}
+                    <span class="product-badge">New</span>
+                {% elif product.is_trending %}
+                    <span class="product-badge trending">TRENDING</span>
+                {% endif %}
+
+            </div>
+
+            <div class="product-info">
+
+                <h3>{{ product.name }}</h3>
+
+                <p class="product-description">
+                    {{ product.description|truncatewords:12 }}
+                    <a href="{% url 'product_detail' product.id %}" class="read-more">
+                    Read More
+                    </a>
+                </p>
+
+                <div class="product-price">
+
+                    {% if product.discount > 0 %}
+                        <span class="discount-price">
+                            Rs. {{ product.price|floatformat:2 }}
+                        </span>
+
+                        <span class="discount">
+                        {{ product.discount }}% OFF
+                        </span>
+
+                        <p class="final-price">
+                        Rs. {{ product.discounted_price|floatformat:2 }}
+                        </p>
+                    {% else %}
+                        <p class="final-price">
+                        Rs. {{ product.price|floatformat:2 }}
+                        </p>
+                    {% endif %}
+
+                </div>
+
+                <p class="stock-status">
+                    {% if product.stock > 0 %}
+                        In Stock
+                    {% else %}
+                        Out of Stock
+                    {% endif %}
+                </p>
+
+                <a href="{% url 'product_detail' product.id %}"
+                   class="view-product-btn">
+                    View Details
+                </a>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+            <p class="empty-message">No products available.</p>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}

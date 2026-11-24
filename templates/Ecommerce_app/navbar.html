@@ -1,0 +1,22 @@
+<header class="site-header">
+  <a href="{% url 'home' %}" class="logo">
+    <span>ShopEase</span>
+  </a>
+
+  <form class="search-form" action="{% url 'home' %}" method="get">
+    <input type="text" name="q" placeholder="Search for products...">
+    <button type="submit">Search</button>
+  </form>
+
+  <nav class="header-links">
+    <a href="{% url 'home' %}">Orders</a>
+
+    {% if user.is_authenticated %}
+      <a href="{% url 'home' %}">{{ user.username }}</a>
+    {% else %}
+      <a href="{% url 'home' %}">Account</a>
+    {% endif %}
+
+    <a href="{% url 'home' %}">Cart <span class="cart-count">0</span></a>
+  </nav>
+</header>
