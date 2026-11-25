@@ -47,7 +47,10 @@
 
         {% if product.stock > 0 %}
             <div class="product-actions">
-                <button type="button">Add to Cart</button>
+                <form method="post" action="{% url 'add_to_cart' product.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Add to Cart</button>
+                </form>
                 <button type="button">Buy Now</button>
             </div>
         {% else %}

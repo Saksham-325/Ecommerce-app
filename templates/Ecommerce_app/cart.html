@@ -1,0 +1,72 @@
+{% extends 'Ecommerce_app/base.html' %}
+{% load static %}
+
+{% block title %}Your Cart | ShopEase{% endblock %}
+
+{% block content %}
+<main class="cart-page">
+  <section class="cart-heading">
+    <div>
+      <span class="cart-eyebrow">Your ShopEase order</span>
+      <h1>Your shopping cart</h1>
+      <p>Review your items and quantities before you continue.</p>
+    </div>
+    <a class="cart-continue" href="{% url 'home' %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Continue shopping</a>
+  </section>
+
+  {% if messages %}
+    <div class="cart-messages" aria-live="polite">
+      {% for message in messages %}<p class="cart-message {{ message.tags }}">{{ message }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  {% if items %}
+    <div class="cart-layout">
+      <section class="cart-items" aria-label="Items in your cart">
+        {% for item in items %}
+          <article class="cart-item">
+            <a class="cart-product-image" href="{% url 'product_detail' item.product.pk %}">
+              {% if item.product.image %}<img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">{% else %}<span>No image</span>{% endif %}
+            </a>
+            <div class="cart-product-info">
+              <a class="cart-product-name" href="{% url 'product_detail' item.product.pk %}">{{ item.product.name }}</a>
+              <p class="cart-unit-price">Rs. {{ item.product.discounted_price|floatformat:2 }} each</p>
+              <span class="cart-stock">{% if item.product.stock > 0 %}In stock{% else %}Out of stock{% endif %}</span>
+            </div>
+            <form class="cart-quantity-form" method="post" action="{% url 'cart' %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="update">
+              <input type="hidden" name="product_id" value="{{ item.product.pk }}">
+              <label for="quantity-{{ item.product.pk }}">Qty</label>
+              <input id="quantity-{{ item.product.pk }}" type="number" name="quantity" min="1" max="{{ item.product.stock }}" value="{{ item.quantity }}" aria-label="Quantity of {{ item.product.name }}">
+              <button type="submit">Update</button>
+            </form>
+            <div class="cart-line-total">Rs. {{ item.line_total|floatformat:2 }}</div>
+            <form method="post" action="{% url 'cart' %}" class="cart-remove-form">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="remove">
+              <input type="hidden" name="product_id" value="{{ item.product.pk }}">
+              <button type="submit" aria-label="Remove {{ item.product.name }} from cart"><i class="fa-regular fa-trash-can" aria-hidden="true"></i> Remove</button>
+            </form>
+          </article>
+        {% endfor %}
+      </section>
+
+      <aside class="cart-summary">
+        <h2>Order summary</h2>
+        <div class="cart-summary-row"><span>Subtotal</span><strong>Rs. {{ subtotal|floatformat:2 }}</strong></div>
+        <p class="cart-summary-note">Delivery and any applicable charges are calculated at checkout.</p>
+        <span class="cart-checkout-disabled">Checkout will be available soon</span>
+        <p class="cart-secure-note"><i class="fa-solid fa-lock" aria-hidden="true"></i> Your cart is saved for this session.</p>
+      </aside>
+    </div>
+  {% else %}
+    <section class="cart-empty">
+      <span class="cart-empty-icon"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i></span>
+      <h2>Your cart is waiting for something good</h2>
+      <p>You haven’t added any products yet. Explore the store and find something you love.</p>
+      <a href="{% url 'home' %}">Browse products</a>
+    </section>
+  {% endif %}
+</main>
+{% endblock %}
