@@ -1,0 +1,58 @@
+{% extends 'Ecommerce_app/base.html' %}
+
+{% block title %}Contact Us | ShopEase{% endblock %}
+
+{% block content %}
+<main class="contact-page">
+  <section class="contact-hero" aria-labelledby="contact-title">
+    <div class="contact-hero-inner">
+      <span class="contact-eyebrow">We’re here to help</span>
+      <h1 id="contact-title">Get in touch with ShopEase</h1>
+      <p>Whether you have a question about a product, an order, or your shopping experience, our team is ready to help. Choose the contact option that works best for you.</p>
+    </div>
+  </section>
+
+  <div class="contact-content">
+    <section class="contact-details" aria-label="Contact details">
+      <article class="contact-card">
+        <span class="contact-icon"><i class="fa-regular fa-envelope" aria-hidden="true"></i></span>
+        <h2>Email us</h2>
+        <p>For product questions and general support, send us an email.</p>
+        <a href="mailto:hello@shopease.example">hello@shopease.example</a>
+        <small>We aim to reply within 1–2 business days.</small>
+      </article>
+      <article class="contact-card">
+        <span class="contact-icon"><i class="fa-solid fa-phone" aria-hidden="true"></i></span>
+        <h2>Call our team</h2>
+        <p>Prefer to speak with someone? Give our customer care team a call.</p>
+        <a href="tel:+97715550142">+977 1 555 0142</a>
+        <small>Monday–Friday, 9:00 AM–5:00 PM</small>
+      </article>
+      <article class="contact-card">
+        <span class="contact-icon"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
+        <h2>Visit us</h2>
+        <p>Our sample office address is listed below.</p>
+        <address>123 Market Street<br>Kathmandu, Nepal</address>
+        <small>Office hours: Monday–Friday, 9:00 AM–5:00 PM</small>
+      </article>
+    </section>
+
+    <section class="contact-note">
+      <div class="contact-note-icon"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></div>
+      <div>
+        <h2>Need help with an order?</h2>
+        <p>Include your order number and the email address used at checkout when contacting us. This helps our team find the right details and assist you faster.</p>
+      </div>
+    </section>
+
+    <section class="contact-bottom">
+      <div>
+        <span class="contact-eyebrow">Your feedback matters</span>
+        <h2>We’d love to hear from you.</h2>
+        <p>Every question and suggestion helps us make ShopEase a more useful place to shop. Reach out by email and our team will be glad to assist.</p>
+      </div>
+      <a href="mailto:hello@shopease.example">Send us an email <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </section>
+  </div>
+</main>
+{% endblock %}
