@@ -1,0 +1,71 @@
+{% extends 'Ecommerce_app/base.html' %}
+{% load static %}
+{% block title %}About Us | ShopEase{% endblock %}
+
+{% block content %}
+<main class="about-page">
+  <section class="about-hero" aria-labelledby="about-title">
+    <div class="about-hero-inner">
+      <span class="about-eyebrow">A little about us</span>
+      <h1 id="about-title">Good finds. A simpler way to shop.</h1>
+      <p>ShopEase is an online marketplace built around a straightforward idea: finding the things you need should feel clear, convenient, and worth coming back to. We bring a considered range of products together in one easy-to-use place.</p>
+    </div>
+  </section>
+
+  <div class="about-content">
+    <section class="about-section about-intro">
+      <div>
+        <h2>Who we are</h2>
+        <p>We are a customer-focused ecommerce store making everyday online shopping easier. From discovering a product to comparing details and placing an order, ShopEase is designed to keep the experience simple and useful.</p>
+        <p>Our catalog brings together products across a range of categories, including technology and everyday essentials. We aim to give each item a clear presentation so you can make an informed choice and shop with confidence.</p>
+      </div>
+      <aside class="about-callout">
+        <strong>Our purpose</strong>
+        <p>Make online shopping feel more convenient, more transparent, and more centered on the customer.</p>
+      </aside>
+    </section>
+
+    <section class="about-section">
+      <h2>What guides us</h2>
+      <p>We believe a good shopping experience comes from getting the fundamentals right: useful choices, honest information, and a site that is easy to navigate.</p>
+      <div class="about-values">
+        <article class="about-value">
+          <i class="fa-solid fa-compass" aria-hidden="true"></i>
+          <h3>Clarity at every step</h3>
+          <p>We organize product information to help you understand what you are browsing and choose what fits your needs.</p>
+        </article>
+        <article class="about-value">
+          <i class="fa-solid fa-heart" aria-hidden="true"></i>
+          <h3>Customer-first thinking</h3>
+          <p>We shape our store around the details that matter to shoppers, from discovery through checkout and beyond.</p>
+        </article>
+        <article class="about-value">
+          <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+          <h3>Always improving</h3>
+          <p>Shopping habits and expectations change. We keep looking for practical ways to make ShopEase more helpful.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="about-section">
+      <h2>Shopping, made straightforward</h2>
+      <p>Our store is designed to make the journey from browsing to buying easy to follow.</p>
+      <div class="about-steps">
+        <article class="about-step"><span>01 / DISCOVER</span><h3>Explore the collection</h3><p>Browse categories or search for a product to find options that match what you are looking for.</p></article>
+        <article class="about-step"><span>02 / DECIDE</span><h3>Review the details</h3><p>Check product descriptions, pricing, and availability so you can make a choice that feels right.</p></article>
+        <article class="about-step"><span>03 / SHOP</span><h3>Order with ease</h3><p>Add your selection to your cart and follow the checkout steps to complete your purchase.</p></article>
+      </div>
+    </section>
+
+    <section class="about-section">
+      <h2>Here to help</h2>
+      <p>Questions are a natural part of shopping online. If you need help with a product or your experience on ShopEase, please get in touch through our contact page. We value your feedback and use it to understand where we can do better.</p>
+    </section>
+
+    <section class="about-cta">
+      <div><h2>Ready to find your next favorite?</h2><p>Explore the latest products available at ShopEase.</p></div>
+      <a href="{% url 'home' %}">Explore products <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </section>
+  </div>
+</main>
+{% endblock %}
