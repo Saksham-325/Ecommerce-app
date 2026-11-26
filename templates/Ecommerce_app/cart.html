@@ -55,8 +55,8 @@
       <aside class="cart-summary">
         <h2>Order summary</h2>
         <div class="cart-summary-row"><span>Subtotal</span><strong>Rs. {{ subtotal|floatformat:2 }}</strong></div>
-        <p class="cart-summary-note">Delivery and any applicable charges are calculated at checkout.</p>
-        <span class="cart-checkout-disabled">Checkout will be available soon</span>
+        <p class="cart-summary-note">Your final order total is confirmed before you place the order.</p>
+        <a class="cart-checkout" href="{% url 'checkout' %}">Continue to checkout <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         <p class="cart-secure-note"><i class="fa-solid fa-lock" aria-hidden="true"></i> Your cart is saved for this session.</p>
       </aside>
     </div>

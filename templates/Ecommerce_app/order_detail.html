@@ -1,0 +1,89 @@
+{% extends 'Ecommerce_app/base.html' %}
+
+{% block title %}Order {{ order.order_number|truncatechars:13 }} | ShopEase{% endblock %}
+
+{% block content %}
+<main class="order-page">
+  <header class="order-page-heading">
+    <div>
+      <span class="order-eyebrow">Order details</span>
+      <h1>Thanks for shopping with ShopEase</h1>
+      <p>Here’s the latest information for your order.</p>
+    </div>
+    <a class="order-back-link" href="{% url 'order_history' %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Your orders</a>
+  </header>
+
+  <section class="order-banner">
+    <div>
+      <span class="order-label">Order number</span>
+      <strong>#{{ order.order_number }}</strong>
+    </div>
+    <div>
+      <span class="order-label">Placed on</span>
+      <strong>{{ order.created_at|date:'F j, Y · g:i A' }}</strong>
+    </div>
+    <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+  </section>
+
+  <section class="order-progress-card">
+    <h2>Order progress</h2>
+    {% if order.status == 'cancelled' %}
+      <p class="order-cancelled-note">This order has been cancelled. Please contact us if you need help.</p>
+    {% else %}
+      <ol class="order-progress">
+        <li class="{% if order.status == 'pending' or order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}complete{% endif %}"><span>1</span><strong>Order placed</strong></li>
+        <li class="{% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}complete{% endif %}"><span>2</span><strong>Processing</strong></li>
+        <li class="{% if order.status == 'shipped' or order.status == 'delivered' %}complete{% endif %}"><span>3</span><strong>Shipped</strong></li>
+        <li class="{% if order.status == 'delivered' %}complete{% endif %}"><span>4</span><strong>Delivered</strong></li>
+      </ol>
+      <p class="order-progress-note">Your order is currently <strong>{{ order.get_status_display|lower }}</strong>. We’ll update this page as its status changes.</p>
+    {% endif %}
+  </section>
+
+  <div class="order-detail-grid">
+    <section class="order-card order-items-card">
+      <h2>Items in this order <span>{{ order.items.count }}</span></h2>
+      {% for item in order.items.all %}
+        <article class="order-item">
+          {% if item.product and item.product.image %}
+            <a class="order-item-image" href="{% url 'product_detail' item.product.pk %}"><img src="{{ item.product.image.url }}" alt="{{ item.product_name }}"></a>
+          {% else %}
+            <div class="order-item-image order-item-placeholder"><i class="fa-solid fa-box" aria-hidden="true"></i></div>
+          {% endif %}
+          <div class="order-item-info">
+            {% if item.product %}<a href="{% url 'product_detail' item.product.pk %}">{{ item.product_name }}</a>{% else %}<strong>{{ item.product_name }}</strong>{% endif %}
+            <p>Quantity: {{ item.quantity }} <span>·</span> Rs. {{ item.unit_price|floatformat:2 }} each</p>
+          </div>
+          <strong class="order-item-total">Rs. {{ item.line_total|floatformat:2 }}</strong>
+        </article>
+      {% endfor %}
+      <div class="order-total-row"><span>Order total</span><strong>Rs. {{ order.subtotal|floatformat:2 }}</strong></div>
+      <p class="order-payment-note">Payment and delivery arrangements will be confirmed by the ShopEase team.</p>
+    </section>
+
+    <aside class="order-side-column">
+      <section class="order-card">
+        <h2>Delivery details</h2>
+        <address>
+          <strong>{{ order.full_name }}</strong><br>
+          {{ order.address|linebreaksbr }}<br>
+          {{ order.city }}{% if order.postal_code %}, {{ order.postal_code }}{% endif %}
+        </address>
+        <p class="order-contact-line"><i class="fa-regular fa-envelope" aria-hidden="true"></i> {{ order.email }}</p>
+        <p class="order-contact-line"><i class="fa-solid fa-phone" aria-hidden="true"></i> {{ order.phone }}</p>
+      </section>
+      {% if order.note %}
+        <section class="order-card">
+          <h2>Note for the store</h2>
+          <p class="order-customer-note">{{ order.note|linebreaksbr }}</p>
+        </section>
+      {% endif %}
+      <section class="order-help-card">
+        <h2>Need a hand?</h2>
+        <p>Contact our team if you have a question about this order.</p>
+        <a href="{% url 'contacts' %}">Contact ShopEase <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </section>
+    </aside>
+  </div>
+</main>
+{% endblock %}

@@ -5,7 +5,7 @@
     <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'categories' %}active{% endif %}">Categories</a>
     <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'products' %}active{% endif %}">Products</a>
     <a href="{% url 'cart' %}" class="{% if request.resolver_match.url_name == 'cart' %}active{% endif %}">Cart</a>
-    <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'orders' %}active{% endif %}">Orders</a>
+    <a href="{% url 'order_history' %}" class="{% if request.resolver_match.url_name == 'order_history' or request.resolver_match.url_name == 'order_detail' %}active{% endif %}">Orders</a>
     <a href="{% url 'wishlist' %}" class="{% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}">Wishlist</a>
     <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">Profile</a>
     <a href="{% url 'contacts' %}" class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Contact</a>

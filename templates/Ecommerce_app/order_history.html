@@ -1,0 +1,41 @@
+{% extends 'Ecommerce_app/base.html' %}
+
+{% block title %}Your Orders | ShopEase{% endblock %}
+
+{% block content %}
+<main class="order-page">
+  <header class="order-page-heading">
+    <div>
+      <span class="order-eyebrow">Your purchases</span>
+      <h1>Your orders</h1>
+      <p>Review your recent purchases and their current status.</p>
+    </div>
+    <a class="order-back-link" href="{% url 'home' %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Continue shopping</a>
+  </header>
+
+  {% if orders %}
+    <section class="order-history-list" aria-label="Order history">
+      {% for order in orders %}
+        <article class="order-history-card">
+          <div class="order-history-top">
+            <div><span class="order-label">Order placed</span><strong>{{ order.created_at|date:'M j, Y' }}</strong></div>
+            <div><span class="order-label">Order number</span><strong>#{{ order.order_number|truncatechars:14 }}</strong></div>
+            <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+          </div>
+          <div class="order-history-bottom">
+            <div><strong>{{ order.items.count }} item{{ order.items.count|pluralize }}</strong><span>Order total: Rs. {{ order.subtotal|floatformat:2 }}</span></div>
+            <a href="{% url 'order_detail' order.order_number %}">View order details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+          </div>
+        </article>
+      {% endfor %}
+    </section>
+  {% else %}
+    <section class="order-empty">
+      <span><i class="fa-solid fa-receipt" aria-hidden="true"></i></span>
+      <h2>No orders yet</h2>
+      <p>When you place an order, you’ll be able to review its details here.</p>
+      <a href="{% url 'home' %}">Browse products</a>
+    </section>
+  {% endif %}
+</main>
+{% endblock %}

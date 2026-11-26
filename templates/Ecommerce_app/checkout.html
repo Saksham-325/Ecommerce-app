@@ -1,0 +1,45 @@
+{% extends 'Ecommerce_app/base.html' %}
+
+{% block title %}Checkout | ShopEase{% endblock %}
+
+{% block content %}
+<main class="order-page checkout-page">
+  <header class="order-page-heading">
+    <div>
+      <span class="order-eyebrow">Almost there</span>
+      <h1>Delivery details</h1>
+      <p>Tell us where to deliver your order. Fields marked with * are required.</p>
+    </div>
+    <a class="order-back-link" href="{% url 'cart' %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to cart</a>
+  </header>
+
+  {% if messages %}<div class="order-form-messages">{% for message in messages %}<p class="{{ message.tags }}">{{ message }}</p>{% endfor %}</div>{% endif %}
+
+  <div class="checkout-grid">
+    <form class="order-card checkout-form" method="post" action="{% url 'checkout' %}">
+      {% csrf_token %}
+      <h2>Contact and delivery address</h2>
+      <div class="checkout-fields">
+        <label>Full name *<input type="text" name="full_name" autocomplete="name" value="{{ details.full_name|default:'' }}" required></label>
+        <label>Email address *<input type="email" name="email" autocomplete="email" value="{{ details.email|default:'' }}" required></label>
+        <label>Phone number *<input type="tel" name="phone" autocomplete="tel" value="{{ details.phone|default:'' }}" required></label>
+        <label class="checkout-field-wide">Street address *<textarea name="address" autocomplete="street-address" rows="3" required>{{ details.address|default:'' }}</textarea></label>
+        <label>City *<input type="text" name="city" autocomplete="address-level2" value="{{ details.city|default:'' }}" required></label>
+        <label>Postal code<input type="text" name="postal_code" autocomplete="postal-code" value="{{ details.postal_code|default:'' }}"></label>
+        <label class="checkout-field-wide">Order note (optional)<textarea name="note" rows="3">{{ details.note|default:'' }}</textarea></label>
+      </div>
+      <p class="checkout-payment-info"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> This demo checkout records your order. Payment is not collected online.</p>
+      <button class="checkout-submit" type="submit">Place order <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+    </form>
+
+    <aside class="order-card checkout-summary">
+      <h2>Order summary</h2>
+      {% for item in items %}
+        <div class="checkout-summary-item"><span>{{ item.product.name }} <small>× {{ item.quantity }}</small></span><strong>Rs. {{ item.line_total|floatformat:2 }}</strong></div>
+      {% endfor %}
+      <div class="checkout-summary-total"><span>Total</span><strong>Rs. {{ subtotal|floatformat:2 }}</strong></div>
+      <p>Prices shown include any product discounts.</p>
+    </aside>
+  </div>
+</main>
+{% endblock %}

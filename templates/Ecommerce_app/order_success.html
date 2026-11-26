@@ -1,0 +1,17 @@
+{% extends 'Ecommerce_app/base.html' %}
+
+{% block title %}Order Received | ShopEase{% endblock %}
+
+{% block content %}
+<main class="order-page">
+  <section class="order-success-card">
+    <span class="order-success-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+    <span class="order-eyebrow">Order received</span>
+    <h1>Thank you, {{ order.full_name }}!</h1>
+    <p>Your order has been recorded. We’ve saved the order details so you can review them any time during this session.</p>
+    <div class="order-success-number"><span>Order number</span><strong>#{{ order.order_number }}</strong></div>
+    <a class="order-primary-button" href="{% url 'order_detail' order.order_number %}">View order details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    <a class="order-secondary-link" href="{% url 'home' %}">Continue shopping</a>
+  </section>
+</main>
+{% endblock %}
