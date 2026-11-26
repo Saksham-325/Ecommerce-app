@@ -51,7 +51,10 @@
                     {% csrf_token %}
                     <button type="submit">Add to Cart</button>
                 </form>
-                <button type="button">Buy Now</button>
+                <form method="post" action="{% url 'buy_now' product.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="buy-now-button">Buy Now</button>
+                </form>
             </div>
         {% else %}
             <p>Out of Stock</p>

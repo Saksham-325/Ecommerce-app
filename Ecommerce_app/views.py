@@ -24,6 +24,8 @@ def product_detail(request,pk):
 def about(request):
     return render(request,'Ecommerce_app/about.html')
 def cart(request):
+    # Opening the cart leaves a Buy Now checkout and returns to the regular cart.
+    request.session.pop('buy_now', None)
     cart_items = request.session.get('cart', {})
     if request.method == 'POST':
         product_id = str(request.POST.get('product_id', ''))
@@ -53,8 +55,9 @@ def cart(request):
     return render(request, 'Ecommerce_app/cart.html', {'items': items, 'subtotal': subtotal})
 
 
-def _get_cart_items(request):
-    cart_items = request.session.get('cart', {})
+def _get_cart_items(request, cart_items=None):
+    if cart_items is None:
+        cart_items = request.session.get('cart', {})
     products = Product.objects.filter(pk__in=cart_items.keys())
     items = []
     subtotal = Decimal('0.00')
@@ -69,8 +72,15 @@ def _get_cart_items(request):
 
 
 def checkout(request):
-    items, subtotal = _get_cart_items(request)
+    buy_now_items = request.session.get('buy_now')
+    is_buy_now = bool(buy_now_items)
+    cart_items = buy_now_items if is_buy_now else request.session.get('cart', {})
+    items, subtotal = _get_cart_items(request, cart_items)
     if not items:
+        if is_buy_now:
+            request.session.pop('buy_now', None)
+            messages.error(request, 'This product is no longer available.')
+            return redirect('cart')
         messages.info(request, 'Add a product to your cart before checkout.')
         return redirect('cart')
 
@@ -93,7 +103,6 @@ def checkout(request):
             messages.error(request, 'Please enter a valid email address.')
             return render(request, 'Ecommerce_app/checkout.html', {'items': items, 'subtotal': subtotal, 'details': details})
 
-        cart_items = request.session.get('cart', {})
         with transaction.atomic():
             products = Product.objects.select_for_update().filter(pk__in=cart_items.keys())
             products_by_id = {str(product.pk): product for product in products}
@@ -120,11 +129,19 @@ def checkout(request):
                 order_lines.append((product, quantity, unit_price))
                 current_subtotal += unit_price * quantity
             if stock_changed:
-                request.session['cart'] = cart_items
                 messages.warning(request, 'Availability changed. Please review your cart and place the order again.')
+                if is_buy_now and cart_items:
+                    request.session['buy_now'] = cart_items
+                    return redirect('checkout')
+                if is_buy_now:
+                    request.session.pop('buy_now', None)
+                    return redirect('cart')
+                request.session['cart'] = cart_items
                 return redirect('cart')
             if not order_lines:
                 messages.error(request, 'Your cart items are no longer available.')
+                if is_buy_now:
+                    request.session.pop('buy_now', None)
                 return redirect('cart')
             order = Order.objects.create(subtotal=current_subtotal, **details)
             for product, quantity, unit_price in order_lines:
@@ -138,7 +155,10 @@ def checkout(request):
         order_numbers = request.session.get('order_numbers', [])
         order_numbers.append(str(order.order_number))
         request.session['order_numbers'] = order_numbers
-        request.session['cart'] = {}
+        if is_buy_now:
+            request.session.pop('buy_now', None)
+        else:
+            request.session['cart'] = {}
         return redirect('order_success', order_number=order.order_number)
 
     return render(request, 'Ecommerce_app/checkout.html', {'items': items, 'subtotal': subtotal})
@@ -177,6 +197,18 @@ def add_to_cart(request, pk):
         request.session['cart'] = cart_items
         messages.success(request, f'{product.name} was added to your cart.')
     return redirect('cart')
+
+
+@require_POST
+def buy_now(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if product.stock < 1:
+        messages.error(request, f'{product.name} is currently out of stock.')
+        return redirect('product_detail', pk=product.pk)
+    request.session['buy_now'] = {str(product.pk): 1}
+    return redirect('checkout')
+
+
 def contacts(request):
     return render(request,'Ecommerce_app/contacts.html')
 def wishlist(request):
