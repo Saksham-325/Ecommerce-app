@@ -28,8 +28,10 @@
         <label>Postal code<input type="text" name="postal_code" autocomplete="postal-code" value="{{ details.postal_code|default:'' }}"></label>
         <label class="checkout-field-wide">Order note (optional)<textarea name="note" rows="3">{{ details.note|default:'' }}</textarea></label>
       </div>
-      <p class="checkout-payment-info"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> This demo checkout records your order. Payment is not collected online.</p>
-      <button class="checkout-submit" type="submit">Place order <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+      <h2>Payment method</h2>
+      <label class="checkout-payment-choice"><input type="radio" name="payment_method" value="esewa" checked required> Pay securely with eSewa</label>
+      <p class="checkout-payment-info"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> You’ll continue to eSewa to complete payment.</p>
+      <button class="checkout-submit" type="submit">Continue to eSewa <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
     </form>
 
     <aside class="order-card checkout-summary">

@@ -1,0 +1,17 @@
+{% extends 'Ecommerce_app/base.html' %}
+{% block title %}Payment status | ShopEase{% endblock %}
+{% block content %}
+<main class="order-page">
+  <section class="order-card">
+    {% if result == 'failed' %}
+      <h1>Payment was not completed</h1>
+      <p>eSewa did not complete payment for order {{ order.order_number }}. The reserved items have been returned to stock.</p>
+      <a class="checkout-submit" href="{% url 'cart' %}">Return to cart</a>
+    {% else %}
+      <h1>Payment is still being confirmed</h1>
+      <p>We haven’t received a final confirmation from eSewa for order {{ order.order_number }}. Check again shortly; your order remains reserved until eSewa reports a final status.</p>
+      <a class="checkout-submit" href="{% url 'esewa_return' %}?order={{ order.order_number }}">Check payment status</a>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

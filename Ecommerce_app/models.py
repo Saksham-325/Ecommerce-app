@@ -46,6 +46,11 @@ class Order(models.Model):
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
     ]
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+    ]
 
     order_number = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     full_name = models.CharField(max_length=150)
@@ -56,6 +61,8 @@ class Order(models.Model):
     postal_code = models.CharField(max_length=20, blank=True)
     note = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    payment_reference = models.CharField(max_length=100, blank=True)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 

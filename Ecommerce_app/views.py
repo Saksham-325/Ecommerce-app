@@ -1,8 +1,19 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+import base64
+import hashlib
+import hmac
+import json
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import urlopen
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
+from django.db.models import F
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render,get_object_or_404,redirect
+from django.urls import reverse
+from django.conf import settings
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from .models import Order, OrderItem, Product
@@ -65,7 +76,7 @@ def _get_cart_items(request, cart_items=None):
         quantity = min(int(cart_items.get(str(product.pk), 1)), product.stock)
         if quantity < 1:
             continue
-        line_total = product.discounted_price * quantity
+        line_total = product.discounted_price.quantize(Decimal('0.01')) * quantity
         subtotal += line_total
         items.append({'product': product, 'quantity': quantity, 'line_total': line_total})
     return items, subtotal
@@ -85,6 +96,9 @@ def checkout(request):
         return redirect('cart')
 
     if request.method == 'POST':
+        if request.POST.get('payment_method') != 'esewa':
+            messages.error(request, 'Please select eSewa as your payment method.')
+            return render(request, 'Ecommerce_app/checkout.html', {'items': items, 'subtotal': subtotal})
         details = {
             'full_name': request.POST.get('full_name', '').strip(),
             'email': request.POST.get('email', '').strip(),
@@ -125,7 +139,7 @@ def checkout(request):
                     continue
                 if quantity < 1:
                     continue
-                unit_price = product.discounted_price
+                unit_price = product.discounted_price.quantize(Decimal('0.01'))
                 order_lines.append((product, quantity, unit_price))
                 current_subtotal += unit_price * quantity
             if stock_changed:
@@ -159,9 +173,116 @@ def checkout(request):
             request.session.pop('buy_now', None)
         else:
             request.session['cart'] = {}
-        return redirect('order_success', order_number=order.order_number)
+        return redirect('esewa_start', order_number=order.order_number)
 
     return render(request, 'Ecommerce_app/checkout.html', {'items': items, 'subtotal': subtotal})
+
+
+def _esewa_signature(fields, secret):
+    message = ','.join(f'{name}={fields[name]}' for name in fields)
+    digest = hmac.new(secret.encode(), message.encode(), hashlib.sha256).digest()
+    return base64.b64encode(digest).decode()
+
+
+def esewa_start(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number)
+    if str(order.order_number) not in request.session.get('order_numbers', []):
+        return redirect('home')
+    if order.payment_status == 'paid':
+        return redirect('order_success', order_number=order.order_number)
+    if order.payment_status == 'failed':
+        return render(request, 'Ecommerce_app/payment_result.html', {'order': order, 'result': 'failed'})
+
+    amount = f'{order.subtotal:.2f}'
+    signed_fields = {
+        'total_amount': amount,
+        'transaction_uuid': str(order.order_number),
+        'product_code': settings.ESEWA_PRODUCT_CODE,
+    }
+    callback = request.build_absolute_uri(reverse('esewa_return'))
+    callback += '?' + urlencode({'order': str(order.order_number)})
+    form_fields = {
+        'amount': amount,
+        'tax_amount': '0',
+        **signed_fields,
+        'product_service_charge': '0',
+        'product_delivery_charge': '0',
+        'success_url': callback,
+        'failure_url': callback,
+        'signed_field_names': ','.join(signed_fields),
+        'signature': _esewa_signature(signed_fields, settings.ESEWA_SECRET_KEY),
+    }
+    return render(request, 'Ecommerce_app/esewa_redirect.html', {
+        'form_url': settings.ESEWA_FORM_URL, 'fields': form_fields,
+    })
+
+
+def esewa_return(request):
+    order = get_object_or_404(Order, order_number=request.GET.get('order'))
+    if str(order.order_number) not in request.session.get('order_numbers', []):
+        return redirect('home')
+    if order.payment_status == 'paid':
+        return redirect('order_success', order_number=order.order_number)
+    if order.payment_status == 'failed':
+        return render(request, 'Ecommerce_app/payment_result.html', {'order': order, 'result': 'failed'})
+
+    if 'data' in request.GET:
+        try:
+            encoded = request.GET['data']
+            response_fields = json.loads(base64.b64decode(encoded, validate=True))
+            signed_names = response_fields['signed_field_names'].split(',')
+            signed_fields = {name: response_fields[name] for name in signed_names}
+            valid_signature = hmac.compare_digest(
+                _esewa_signature(signed_fields, settings.ESEWA_SECRET_KEY),
+                response_fields['signature'],
+            )
+        except (KeyError, ValueError, TypeError, UnicodeDecodeError, json.JSONDecodeError):
+            return HttpResponseBadRequest('Invalid eSewa response.')
+        if not valid_signature or response_fields.get('transaction_uuid') != str(order.order_number):
+            return HttpResponseBadRequest('eSewa response could not be verified.')
+
+    try:
+        query = urlencode({
+            'product_code': settings.ESEWA_PRODUCT_CODE,
+            'total_amount': f'{order.subtotal:.2f}',
+            'transaction_uuid': str(order.order_number),
+        })
+        with urlopen(f'{settings.ESEWA_STATUS_URL}?{query}', timeout=10) as response:
+            status_data = json.loads(response.read().decode())
+    except (HTTPError, URLError, TimeoutError, ValueError):
+        return render(request, 'Ecommerce_app/payment_result.html', {'order': order, 'result': 'pending'})
+
+    try:
+        matches_order = (
+            status_data.get('product_code') == settings.ESEWA_PRODUCT_CODE
+            and status_data.get('transaction_uuid') == str(order.order_number)
+            and Decimal(str(status_data.get('total_amount', '0')).replace(',', '')) == order.subtotal
+        )
+    except (AttributeError, TypeError, ValueError, InvalidOperation):
+        matches_order = False
+    if not isinstance(status_data, dict):
+        return render(request, 'Ecommerce_app/payment_result.html', {'order': order, 'result': 'pending'})
+    if status_data.get('status') == 'COMPLETE' and matches_order:
+        with transaction.atomic():
+            locked_order = Order.objects.select_for_update().get(pk=order.pk)
+            if locked_order.payment_status == 'pending':
+                locked_order.payment_status = 'paid'
+                locked_order.payment_reference = status_data.get('ref_id', '')
+                locked_order.status = 'processing'
+                locked_order.save(update_fields=['payment_status', 'payment_reference', 'status'])
+        return redirect('order_success', order_number=order.order_number)
+
+    if status_data.get('status') in ('NOT_FOUND', 'CANCELED') and matches_order:
+        with transaction.atomic():
+            locked_order = Order.objects.select_for_update().get(pk=order.pk)
+            if locked_order.payment_status == 'pending':
+                for item in locked_order.items.select_related('product'):
+                    if item.product_id:
+                        Product.objects.filter(pk=item.product_id).update(stock=F('stock') + item.quantity)
+                locked_order.payment_status = 'failed'
+                locked_order.save(update_fields=['payment_status'])
+        return render(request, 'Ecommerce_app/payment_result.html', {'order': order, 'result': 'failed'})
+    return render(request, 'Ecommerce_app/payment_result.html', {'order': order, 'result': 'pending'})
 
 
 def order_success(request, order_number):

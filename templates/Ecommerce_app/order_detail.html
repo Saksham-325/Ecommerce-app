@@ -58,7 +58,7 @@
         </article>
       {% endfor %}
       <div class="order-total-row"><span>Order total</span><strong>Rs. {{ order.subtotal|floatformat:2 }}</strong></div>
-      <p class="order-payment-note">Payment and delivery arrangements will be confirmed by the ShopEase team.</p>
+      <p class="order-payment-note">eSewa payment: <strong>{{ order.get_payment_status_display }}</strong>{% if order.payment_reference %} · Reference {{ order.payment_reference }}{% endif %}</p>
     </section>
 
     <aside class="order-side-column">

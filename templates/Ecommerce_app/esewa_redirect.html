@@ -1,0 +1,15 @@
+{% extends 'Ecommerce_app/base.html' %}
+{% block title %}Redirecting to eSewa | ShopEase{% endblock %}
+{% block content %}
+<main class="order-page">
+  <section class="order-card">
+    <h1>Continue to eSewa</h1>
+    <p>Your order is reserved while you complete payment.</p>
+    <form id="esewa-payment-form" method="post" action="{{ form_url }}">
+      {% for name, value in fields.items %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+      <button class="checkout-submit" type="submit">Continue to eSewa</button>
+    </form>
+  </section>
+</main>
+<script>document.getElementById('esewa-payment-form').submit();</script>
+{% endblock %}
